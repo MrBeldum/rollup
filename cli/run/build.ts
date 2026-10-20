@@ -1,3 +1,4 @@
+import { once } from 'node:events';
 import process from 'node:process';
 import ms from 'pretty-ms';
 import { rollup } from '../../src/node-entry';
@@ -38,8 +39,8 @@ export default async function build(
 		}
 		const { output: outputs } = await bundle.generate(output);
 		for (const file of outputs) {
-			if (outputs.length > 1) process.stdout.write(`\n${cyan(bold(`//→ ${file.fileName}:`))}\n`);
-			process.stdout.write(file.type === 'asset' ? file.source : file.code);
+			if (outputs.length > 1) await writeToStdout(`\n${cyan(bold(`//→ ${file.fileName}:`))}\n`);
+			await writeToStdout(file.type === 'asset' ? file.source : file.code);
 		}
 		if (!silent) {
 			warnings.flush();
@@ -54,5 +55,11 @@ export default async function build(
 		if (bundle && bundle.getTimings) {
 			printTimings(bundle.getTimings());
 		}
+	}
+}
+
+async function writeToStdout(data: string | Uint8Array): Promise<void> {
+	if (!process.stdout.write(data)) {
+		await once(process.stdout, 'drain');
 	}
 }
