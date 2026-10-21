@@ -333,7 +333,27 @@ export default class Chunk {
 				return false;
 			}
 		}
-		// Additionally, we need to expose namespaces of dynamic entries that are not the facade module and exports from other entry modules
+		return this.canModuleExposeVariables(module, exposedVariables);
+	}
+
+	canModuleBeDynamicEntryFacade(module: Module, exposedVariables: ReadonlySet<Variable>): boolean {
+		// Unlike a strict facade, a dynamic entry facade does not need to expose
+		// all chunk exports itself. Additional chunk exports are assigned
+		// deconflicted names in generateExports, so the entry's original export
+		// names stay available on the chunk namespace for dynamic imports.
+		// This is only useful when the module has exports to preserve.
+		return (
+			module.getExportNamesByVariable().size > 0 &&
+			this.canModuleExposeVariables(module, exposedVariables)
+		);
+	}
+
+	private canModuleExposeVariables(
+		module: Module,
+		exposedVariables: ReadonlySet<Variable>
+	): boolean {
+		const moduleExportNamesByVariable = module.getExportNamesByVariable();
+		// We need to expose namespaces of dynamic entries that are not the facade module and exports from other entry modules
 		for (const exposedVariable of exposedVariables) {
 			if (!(
 				exposedVariable.module === module ||
@@ -509,7 +529,12 @@ export default class Chunk {
 		}
 		for (const module of this.dynamicEntryModules) {
 			if (module.info.syntheticNamedExports) continue;
-			if (!this.facadeModule && this.canModuleBeFacade(module, exposedVariables)) {
+			const hasStrictFacade = this.facadeChunkByModule.get(module)?.strictFacade;
+			if (
+				!this.facadeModule &&
+				(this.canModuleBeFacade(module, exposedVariables) ||
+					(!hasStrictFacade && this.canModuleBeDynamicEntryFacade(module, exposedVariables)))
+			) {
 				this.facadeModule = module;
 				this.facadeChunkByModule.set(module, this);
 				this.strictFacade = true;
@@ -520,7 +545,7 @@ export default class Chunk {
 				this.canModuleBeFacade(module, exposedVariables)
 			) {
 				this.strictFacade = true;
-			} else if (!this.facadeChunkByModule.get(module)?.strictFacade) {
+			} else if (!hasStrictFacade) {
 				this.includedNamespaces.add(module);
 				this.exports.add(module.namespace);
 			}

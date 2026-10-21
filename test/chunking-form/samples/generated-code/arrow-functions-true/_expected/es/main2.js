@@ -1,1 +1,1 @@
-import('./generated-dep1.js').then(n => n.d).then(console.log);
+import('./generated-dep1.js').then(console.log);

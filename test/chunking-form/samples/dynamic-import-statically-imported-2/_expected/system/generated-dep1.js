@@ -4,7 +4,7 @@ System.register([], (function (exports) {
 		execute: (function () {
 
 			exports({
-				b: bar,
+				bar: bar,
 				f: foo
 			});
 
@@ -22,7 +22,6 @@ System.register([], (function (exports) {
 				__proto__: null,
 				bar: bar
 			});
-			exports("d", dep1);
 
 		})
 	};

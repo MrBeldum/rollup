@@ -11,7 +11,6 @@ define(['exports'], (function (exports) { 'use strict';
 	});
 
 	exports.bar = bar;
-	exports.dep1 = dep1;
 	exports.foo = foo;
 
 }));

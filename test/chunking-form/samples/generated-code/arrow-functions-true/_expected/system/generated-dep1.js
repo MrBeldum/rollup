@@ -6,13 +6,12 @@ System.register([], (function (exports) {
 			const foo = exports("f", 'dep2');
 			Promise.resolve().then(() => dep1).then(console.log);
 
-			const bar = exports("b", 'dep1' + foo);
+			const bar = exports("bar", 'dep1' + foo);
 
 			var dep1 = /*#__PURE__*/Object.freeze({
 				__proto__: null,
 				bar: bar
 			});
-			exports("d", dep1);
 
 		})
 	};

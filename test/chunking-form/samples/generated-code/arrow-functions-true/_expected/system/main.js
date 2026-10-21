@@ -4,7 +4,7 @@ System.register(['./generated-dep1.js'], (function () {
 	return {
 		setters: [module => {
 			foo = module.f;
-			bar = module.b;
+			bar = module.bar;
 		}],
 		execute: (function () {
 
